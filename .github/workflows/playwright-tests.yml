@@ -1,0 +1,71 @@
+name: AI Image Studio - Playwright Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+        
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Install Playwright Browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+        
+      - name: Setup Python for backend
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+      - name: Start backend server
+        working-directory: ./backend
+        run: |
+          source venv/bin/activate
+          python main.py &
+          sleep 10
+          
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+        
+      - name: Start frontend server
+        working-directory: ./frontend
+        run: |
+          npm start &
+          sleep 10
+          
+      - name: Run Playwright tests
+        working-directory: ./frontend
+        run: npx playwright test --project=${{ matrix.browser }}
+        
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: frontend/playwright-report/
+          retention-days: 30
