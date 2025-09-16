@@ -19,7 +19,9 @@ export default function Hero() {
     const file = acceptedFiles[0]
     if (file) {
       setUploadedFile(file)
-      handleFileUpload(file)
+      // Don't upload immediately - wait for user to select operation
+      toast.success('Image ready for processing!')
+      setCurrentView('options')
     }
   }, [])
 
@@ -43,37 +45,8 @@ export default function Hero() {
   })
 
   const handleFileUpload = async (file: File) => {
-    setIsUploading(true)
-    
-    try {
-      // Create form data
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      // Send to backend API
-      const response = await fetch('http://localhost:8000/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Upload failed:', response.status, errorText)
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`)
-      }
-      
-      const result = await response.json()
-      toast.success('Image uploaded successfully!')
-      setCurrentView('options')
-      
-    } catch (error) {
-      console.error('Upload error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.'
-      toast.error(errorMessage)
-      setUploadedFile(null)
-    } finally {
-      setIsUploading(false)
-    }
+    // This function is no longer needed since we don't upload immediately
+    // File will be uploaded with operation and model in ProcessingInterface
   }
 
   const handleButtonUpload = () => {
@@ -85,7 +58,9 @@ export default function Hero() {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
         setUploadedFile(file)
-        handleFileUpload(file)
+        // Don't upload immediately - wait for user to select operation
+        toast.success('Image ready for processing!')
+        setCurrentView('options')
       }
     }
     fileInput.click()

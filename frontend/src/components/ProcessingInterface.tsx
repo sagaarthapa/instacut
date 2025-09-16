@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { ArrowLeftIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
+import BeforeAfterSlider from './BeforeAfterSlider'
 
 interface ProcessingInterfaceProps {
   uploadedFile: File
@@ -23,21 +24,35 @@ export default function ProcessingInterface({
 }: ProcessingInterfaceProps) {
   const [isProcessing, setIsProcessing] = useState(false)
   const [processedResult, setProcessedResult] = useState<any>(null)
+  const [processingProgress, setProcessingProgress] = useState(0)
   const [originalPreview, setOriginalPreview] = useState<string>('')
   const [processedPreview, setProcessedPreview] = useState<string>('')
+  const [originalDimensions, setOriginalDimensions] = useState<{width: number, height: number} | null>(null)
+  const [processedDimensions, setProcessedDimensions] = useState<{width: number, height: number} | null>(null)
 
   useEffect(() => {
     // Create preview of original image
     const reader = new FileReader()
     reader.onload = (e) => {
-      setOriginalPreview(e.target?.result as string)
+      const imageUrl = e.target?.result as string
+      setOriginalPreview(imageUrl)
+      
+      // Get original image dimensions
+      const img = new Image()
+      img.onload = () => {
+        setOriginalDimensions({
+          width: img.width,
+          height: img.height
+        })
+      }
+      img.src = imageUrl
     }
     reader.readAsDataURL(uploadedFile)
   }, [uploadedFile])
 
   const operationTitles: { [key: string]: string } = {
     'background_removal': 'Background Removal',
-    'upscaling': 'Image Upscaling',
+    'upscale': 'Image Upscaling',
     'enhancement': 'Quality Enhancement',
     'generation': 'AI Generation'
   }
@@ -45,6 +60,7 @@ export default function ProcessingInterface({
   const handleProcess = async () => {
     console.log('🚀 Starting processing...')
     setIsProcessing(true)
+    setProcessingProgress(0)
     
     try {
       const formData = new FormData()
@@ -54,10 +70,33 @@ export default function ProcessingInterface({
 
       console.log('📤 Sending processing request...')
       
-      // Create AbortController for timeout
+      // Start progress simulation
+      const progressInterval = setInterval(() => {
+        setProcessingProgress(prev => {
+          if (prev >= 95) return 95 // Hard cap at 95% until real completion
+          const increment = Math.random() * 10 // Smaller increments (0-10%)
+          return Math.min(prev + increment, 95) // Ensure never exceeds 95%
+        })
+      }, 2000) // Update every 2 seconds
+      
+      // Create AbortController for timeout - increased to 5 minutes for complex upscaling
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+      const timeoutId = setTimeout(() => {
+        console.warn('⏰ Request timeout - aborting after 5 minutes')
+        clearInterval(progressInterval)
+        controller.abort()
+      }, 300000) // 5 minute timeout for complex upscaling
 
+      console.log('📡 Making fetch request to API...')
+      console.log('📋 Request details:', {
+        url: 'http://localhost:8000/api/v1/process',
+        method: 'POST',
+        operation,
+        model,
+        fileType: uploadedFile.type,
+        fileSize: uploadedFile.size
+      })
+      
       const response = await fetch('http://localhost:8000/api/v1/process', {
         method: 'POST',
         body: formData,
@@ -65,6 +104,8 @@ export default function ProcessingInterface({
       })
 
       clearTimeout(timeoutId)
+      clearInterval(progressInterval)
+      console.log('📨 Response received:', response.status, response.statusText)
 
       if (!response.ok) {
         const errorText = await response.text()
@@ -92,6 +133,17 @@ export default function ProcessingInterface({
             const blob = await imageResponse.blob()
             const previewUrl = URL.createObjectURL(blob)
             setProcessedPreview(previewUrl)
+            
+            // Get processed image dimensions
+            const img = new Image()
+            img.onload = () => {
+              setProcessedDimensions({
+                width: img.width,
+                height: img.height
+              })
+            }
+            img.src = previewUrl
+            
             console.log('✅ Image preview loaded successfully')
           } else {
             console.warn('⚠️ Failed to load image preview, but processing was successful')
@@ -103,15 +155,31 @@ export default function ProcessingInterface({
       }
       
       console.log('🎉 Processing completed successfully!')
+      setProcessingProgress(100)
       toast.success('Image processed successfully!')
       
     } catch (error) {
       console.error('❌ Processing error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Processing failed. Please try again.'
+      
+      // Handle different error types
+      let errorMessage: string
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Processing timed out after 5 minutes. Please try with a smaller image or different settings.'
+        } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check if the server is running and try again.'
+        } else {
+          errorMessage = error.message
+        }
+      } else {
+        errorMessage = 'Processing failed. Please try again.'
+      }
+      
       toast.error(errorMessage)
     } finally {
       console.log('🔄 Setting isProcessing to false in finally block')
       setIsProcessing(false)
+      setProcessingProgress(0)
     }
   }
 
@@ -247,9 +315,18 @@ export default function ProcessingInterface({
                 
                 {isProcessing && (
                   <div className="mt-6">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Processing with AI... This may take up to 60 seconds for high-quality results.
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+                      <div 
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${processingProgress}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-600 mb-2">
+                      <span>Processing with Real-ESRGAN AI...</span>
+                      <span>{Math.round(processingProgress)}%</span>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      High-quality upscaling in progress. This may take up to 5 minutes for complex images.
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
                       Please don't close this tab while processing.
@@ -287,48 +364,101 @@ export default function ProcessingInterface({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="grid md:grid-cols-2 gap-6"
+              className="grid gap-6"
             >
-              {/* Original Image */}
-              <div className="card p-6">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Original
-                </h4>
-                {originalPreview && (
-                  <img
-                    src={originalPreview}
-                    alt="Original image"
-                    className="w-full h-64 object-contain rounded-lg bg-gray-100 dark:bg-gray-800"
+              {/* Before/After Slider when both images are available */}
+              {originalPreview && processedPreview && (
+                <div className="card p-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Compare Results - Before vs After
+                  </h4>
+                  <BeforeAfterSlider
+                    beforeImage={originalPreview}
+                    afterImage={processedPreview}
+                    beforeDimensions={originalDimensions || undefined}
+                    afterDimensions={processedDimensions || undefined}
+                    beforeLabel="Original"
+                    afterLabel="Enhanced"
                   />
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* Processed Image */}
-              <div className="card p-6">
-                <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  {processedPreview ? 'Processed' : (isProcessing ? 'Processing...' : 'Ready')}
-                </h4>
-                {processedPreview ? (
-                  <img
-                    src={processedPreview}
-                    alt="Processed image"
-                    className="w-full h-64 object-contain rounded-lg bg-gray-100 dark:bg-gray-800"
-                  />
-                ) : (
-                  <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      {isProcessing ? (
-                        <>
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-2"></div>
-                          <p className="text-sm text-gray-500">Processing...</p>
-                        </>
-                      ) : (
-                        <p className="text-sm text-gray-500">Click "Start Processing" to begin</p>
+              {/* Individual images when only one is available */}
+              {(!processedPreview || !originalPreview) && (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Original Image */}
+                  {originalPreview && (
+                    <div className="card p-6">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                        Original
+                      </h4>
+                      {originalDimensions && (
+                        <p className="text-sm text-gray-500 mb-4">
+                          {originalDimensions.width} × {originalDimensions.height} pixels
+                        </p>
                       )}
+                      <div className="relative">
+                        <img
+                          src={originalPreview}
+                          alt="Original image"
+                          className="w-full h-64 object-contain rounded-lg bg-gray-100 dark:bg-gray-800"
+                        />
+                        {originalDimensions && (
+                          <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                            {originalDimensions.width} × {originalDimensions.height}
+                          </div>
+                        )}
+                      </div>
                     </div>
+                  )}
+
+                  {/* Processed Image or Processing Status */}
+                  <div className="card p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {processedPreview ? 'Processed' : (isProcessing ? 'Processing...' : 'Ready')}
+                    </h4>
+                    {processedDimensions && (
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-500">
+                          {processedDimensions.width} × {processedDimensions.height} pixels
+                        </p>
+                        {originalDimensions && operation === 'upscaling' && (
+                          <p className="text-sm text-green-600 font-medium">
+                            {Math.round((processedDimensions.width / originalDimensions.width) * 100) / 100}× larger
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {processedPreview ? (
+                      <div className="relative">
+                        <img
+                          src={processedPreview}
+                          alt="Processed image"
+                          className="w-full h-64 object-contain rounded-lg bg-gray-100 dark:bg-gray-800"
+                        />
+                        {processedDimensions && (
+                          <div className="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                            {processedDimensions.width} × {processedDimensions.height}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          {isProcessing ? (
+                            <>
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-2"></div>
+                              <p className="text-sm text-gray-500">Processing...</p>
+                            </>
+                          ) : (
+                            <p className="text-sm text-gray-500">Click "Start Processing" to begin</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </motion.div>
           )}
         </motion.div>

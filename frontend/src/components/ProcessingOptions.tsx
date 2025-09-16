@@ -32,7 +32,7 @@ export default function ProcessingOptions({
       model: 'rembg'
     },
     {
-      id: 'upscaling',
+      id: 'upscale',
       title: 'Upscale Image',
       description: 'Enhance image resolution up to 8x with AI',
       icon: <ArrowsPointingOutIcon className="w-8 h-8" />,

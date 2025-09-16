@@ -26,11 +26,25 @@ export function Providers({ children }: ProvidersProps) {
         toastOptions={{
           duration: 4000,
           style: {
-            background: 'rgba(255, 255, 255, 0.1)',
+            background: 'rgba(0, 0, 0, 0.8)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '12px',
             color: 'white',
+          },
+          success: {
+            style: {
+              background: 'rgba(34, 197, 94, 0.9)',
+              color: 'white',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+            },
+          },
+          error: {
+            style: {
+              background: 'rgba(239, 68, 68, 0.9)',
+              color: 'white',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+            },
           },
         }}
       />

@@ -95,7 +95,7 @@ async def process_image(
         logger.info(f"Processing image: {file.filename}, operation: {operation}")
         
         # Validate file
-        if not file.content_type.startswith('image/'):
+        if not file.content_type or not file.content_type.startswith('image/'):
             raise HTTPException(status_code=400, detail="File must be an image")
         
         # Save uploaded file
@@ -137,7 +137,7 @@ async def batch_process(
         
         results = []
         for file in files:
-            if not file.content_type.startswith('image/'):
+            if not file.content_type or not file.content_type.startswith('image/'):
                 continue
                 
             # Save uploaded file
