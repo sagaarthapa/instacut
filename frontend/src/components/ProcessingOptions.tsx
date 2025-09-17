@@ -32,9 +32,9 @@ export default function ProcessingOptions({
       model: 'rembg'
     },
     {
-      id: 'upscale',
+      id: 'upscaling',
       title: 'Upscale Image',
-      description: 'Enhance image resolution up to 8x with AI',
+      description: 'Enhance image resolution up to 4x with AI',
       icon: <ArrowsPointingOutIcon className="w-8 h-8" />,
       gradient: 'from-green-500 to-emerald-500',
       model: 'realesrgan_4x'

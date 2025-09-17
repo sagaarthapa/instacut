@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upscaling Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .upload-area { border: 2px dashed #ccc; padding: 40px; text-align: center; margin: 20px 0; }
+        .upload-area.dragover { border-color: #007bff; background-color: #f8f9fa; }
+        .result { margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px; }
+        .image-compare { display: flex; gap: 20px; margin: 20px 0; }
+        .image-container { flex: 1; text-align: center; }
+        .image-container img { max-width: 100%; border: 1px solid #ddd; }
+        .progress { display: none; margin: 20px 0; }
+        .progress-bar { width: 100%; height: 20px; background-color: #f0f0f0; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: #007bff; width: 0%; transition: width 0.3s ease; }
+        .log { background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Upscaling Test Page</h1>
+        <p>This tests the upscaling functionality directly without Next.js issues.</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <p>Drop an image here or click to select</p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <label for="modelSelect">Model:</label>
+            <select id="modelSelect">
+                <option value="auto">Auto (Best Available)</option>
+                <optgroup label="Real-ESRGAN (Highest Quality)">
+                    <option value="realesrgan_4x">Real-ESRGAN 4x (Recommended)</option>
+                    <option value="realesrgan_2x">Real-ESRGAN 2x</option>
+                    <option value="realesrgan_anime">Real-ESRGAN Anime</option>
+                </optgroup>
+                <optgroup label="Super Enhanced PIL">
+                    <option value="super_enhanced_4x">Super Enhanced 4x</option>
+                    <option value="super_enhanced_2x">Super Enhanced 2x</option>
+                    <option value="enhanced_pro_4x">Enhanced Pro 4x</option>
+                </optgroup>
+                <optgroup label="Standard Methods">
+                    <option value="enhanced_4x">Enhanced 4x</option>
+                    <option value="lanczos_4x">Lanczos 4x</option>
+                    <option value="bicubic_4x">Bicubic 4x</option>
+                </optgroup>
+            </select>
+            <button id="processBtn" disabled>🔍 Upscale Image</button>
+        </div>
+        
+        <div class="progress" id="progress">
+            <p>Processing...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="result" id="result" style="display: none;"></div>
+        
+        <div class="image-compare" id="imageCompare" style="display: none;">
+            <div class="image-container">
+                <h3>Original</h3>
+                <img id="originalImg" alt="Original">
+                <p id="originalInfo"></p>
+            </div>
+            <div class="image-container">
+                <h3>Upscaled</h3>
+                <img id="processedImg" alt="Processed">
+                <p id="processedInfo"></p>
+                <button id="downloadBtn" style="margin-top: 10px;">📥 Download</button>
+            </div>
+        </div>
+        
+        <div>
+            <h3>Debug Log:</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let processedResult = null;
+
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const processBtn = document.getElementById('processBtn');
+        const modelSelect = document.getElementById('modelSelect');
+        const progress = document.getElementById('progress');
+        const progressFill = document.getElementById('progressFill');
+        const result = document.getElementById('result');
+        const imageCompare = document.getElementById('imageCompare');
+        const originalImg = document.getElementById('originalImg');
+        const processedImg = document.getElementById('processedImg');
+        const originalInfo = document.getElementById('originalInfo');
+        const processedInfo = document.getElementById('processedInfo');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const log = document.getElementById('log');
+
+        function addLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            addLog(`Selected file: ${file.name} (${file.size} bytes, ${file.type})`);
+            uploadArea.innerHTML = `<p>✅ Selected: ${file.name}</p>`;
+            processBtn.disabled = false;
+
+            // Show original image preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalImg.src = e.target.result;
+                const img = new Image();
+                img.onload = () => {
+                    originalInfo.textContent = `${img.width} × ${img.height} pixels`;
+                    addLog(`Original dimensions: ${img.width} × ${img.height}`);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        processBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            addLog('🚀 Starting upscaling process...');
+            processBtn.disabled = true;
+            progress.style.display = 'block';
+            result.style.display = 'none';
+            imageCompare.style.display = 'none';
+
+            // Simulate progress
+            let progressValue = 0;
+            const progressInterval = setInterval(() => {
+                progressValue += Math.random() * 10;
+                if (progressValue > 95) progressValue = 95;
+                progressFill.style.width = `${progressValue}%`;
+            }, 1000);
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('operation', 'upscaling');
+                formData.append('model', modelSelect.value);
+
+                addLog(`📤 Sending request to backend...`);
+                addLog(`   Operation: upscaling`);
+                addLog(`   Model: ${modelSelect.value}`);
+
+                const response = await fetch('http://localhost:8000/api/v1/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+
+                addLog(`📨 Response status: ${response.status}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addLog('✅ Processing completed successfully!');
+                    addLog(`Response data: ${JSON.stringify(data, null, 2)}`);
+                    
+                    processedResult = data;
+                    
+                    // Show result
+                    result.innerHTML = `
+                        <h3>✅ Success!</h3>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>Output File:</strong> ${data.result?.output_filename}</p>
+                    `;
+                    result.style.display = 'block';
+
+                    // Load processed image
+                    if (data.result?.output_filename) {
+                        const downloadUrl = `http://localhost:8000/api/v1/download/${data.result.output_filename}`;
+                        addLog(`📥 Loading processed image from: ${downloadUrl}`);
+                        
+                        try {
+                            const imgResponse = await fetch(downloadUrl);
+                            if (imgResponse.ok) {
+                                const blob = await imgResponse.blob();
+                                const imageUrl = URL.createObjectURL(blob);
+                                processedImg.src = imageUrl;
+                                
+                                const img = new Image();
+                                img.onload = () => {
+                                    processedInfo.textContent = `${img.width} × ${img.height} pixels`;
+                                    addLog(`Processed dimensions: ${img.width} × ${img.height}`);
+                                    
+                                    const originalDims = originalInfo.textContent.split(' × ').map(d => parseInt(d));
+                                    const scale = img.width / originalDims[0];
+                                    addLog(`🔍 Scale factor: ${scale.toFixed(1)}x`);
+                                };
+                                img.src = imageUrl;
+                                
+                                imageCompare.style.display = 'flex';
+                                addLog('✅ Image preview loaded successfully!');
+                            } else {
+                                addLog(`❌ Failed to load image preview: ${imgResponse.status}`);
+                            }
+                        } catch (previewError) {
+                            addLog(`⚠️ Preview error: ${previewError.message}`);
+                        }
+                    }
+                } else {
+                    const errorText = await response.text();
+                    addLog(`❌ Processing failed: ${response.status} - ${errorText}`);
+                    result.innerHTML = `<h3>❌ Error</h3><p>${errorText}</p>`;
+                    result.style.display = 'block';
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                addLog(`❌ Request failed: ${error.message}`);
+                result.innerHTML = `<h3>❌ Error</h3><p>${error.message}</p>`;
+                result.style.display = 'block';
+            } finally {
+                processBtn.disabled = false;
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 1000);
+            }
+        });
+
+        downloadBtn.addEventListener('click', async () => {
+            if (!processedResult?.result?.output_filename) return;
+
+            addLog('📥 Starting download...');
+            try {
+                const downloadUrl = `http://localhost:8000/api/v1/download/${processedResult.result.output_filename}`;
+                const response = await fetch(downloadUrl);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = processedResult.result.output_filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    addLog('✅ Download completed!');
+                } else {
+                    addLog(`❌ Download failed: ${response.status}`);
+                }
+            } catch (error) {
+                addLog(`❌ Download error: ${error.message}`);
+            }
+        });
+
+        // Initialize
+        addLog('🔧 Test page initialized');
+        addLog('📍 Backend URL: http://localhost:8000');
+    </script>
+</body>
+</html>

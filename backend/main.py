@@ -9,7 +9,10 @@ import os
 import uuid
 from typing import List, Optional, Dict, Any
 import logging
-from ai_services import AIServiceOrchestrator
+
+# Import the new modular AI services
+from modular_ai_services import ModularAIOrchestrator
+
 from database import init_db, get_db, ProcessingHistory, UserSession
 
 # Setup logging
@@ -30,14 +33,14 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080", "http://127.0.0.1:8080"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Initialize AI Services
-ai_orchestrator = AIServiceOrchestrator()
+# Initialize Modular AI Services
+ai_orchestrator = ModularAIOrchestrator()
 
 @app.on_event("startup")
 async def startup_event():
@@ -78,6 +81,57 @@ async def health_check():
         "ai_services": ai_orchestrator.get_available_services()
     }
 
+@app.get("/api/v1/health")
+async def health_check_v1():
+    """Health check endpoint - API v1"""
+    return {
+        "status": "healthy",
+        "timestamp": asyncio.get_event_loop().time(),
+        "ai_services": ai_orchestrator.get_available_services()
+    }
+
+@app.post("/api/v1/enhance")
+async def enhance_image(
+    file: UploadFile = File(...),
+    operation: str = Form(...),
+    model: Optional[str] = Form(None),
+    options: Optional[str] = Form("{}")
+):
+    """Enhanced image processing endpoint (alias for /api/v1/process)"""
+    try:
+        logger.info(f"Enhancing image: {file.filename}, operation: {operation}")
+        
+        # Validate file
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Save uploaded file
+        upload_path = f"uploads/{file.filename}"
+        with open(upload_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        # Process image
+        result = await ai_orchestrator.process_image(
+            image_path=upload_path,
+            operation=operation,
+            model=model,
+            options=options or "{}"
+        )
+        
+        return JSONResponse(content={
+            "status": "success",
+            "message": "Image enhanced successfully",
+            "result": result,
+            "processing_time": result.get("processing_time", 0),
+            "cost": result.get("cost", 0),
+            "model_used": result.get("model_used", model or "auto")
+        })
+        
+    except Exception as e:
+        logger.error(f"Enhancement error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Enhancement failed: {str(e)}")
+
 @app.get("/api/v1/models")
 async def get_available_models():
     """Get list of available AI models"""
@@ -86,7 +140,7 @@ async def get_available_models():
         "count": len(ai_orchestrator.list_available_models()),
         "categories": {
             "background_removal": ["rembg", "remove_bg_api"],
-            "upscaling": ["realesrgan_2x", "realesrgan_4x", "realesrgan_8x"],
+            "upscaling": ["realesrgan_2x", "realesrgan_4x", "realesrgan_8x", "realesrgan_anime", "realesrgan_face"],
             "generation": ["stable_diffusion", "dalle_3"],
             "enhancement": ["gfpgan", "codeformer"]
         }
@@ -118,7 +172,7 @@ async def process_image(
             image_path=upload_path,
             operation=operation,
             model=model,
-            options=options
+            options=options or "{}"
         )
         
         return JSONResponse(content={
@@ -146,7 +200,7 @@ async def batch_process(
         
         results = []
         for file in files:
-            if not file.content_type.startswith('image/'):
+            if not file.content_type or not file.content_type.startswith('image/'):
                 continue
                 
             # Save uploaded file

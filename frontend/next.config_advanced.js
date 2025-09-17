@@ -4,9 +4,9 @@ const nextConfig = {
   experimental: {
     // Enable Server Components optimization
     serverComponentsExternalPackages: ['sharp'],
-    // PPR requires canary version - disabled
-    // ppr: true, 
-    // reactCompiler: true,
+    // Enable advanced features
+    ppr: true, // Partial Prerendering
+    reactCompiler: true,
     // WebAssembly support for image processing
     webVitalsAttribution: ['CLS', 'LCP'],
   },

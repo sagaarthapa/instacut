@@ -52,7 +52,7 @@ export default function ProcessingInterface({
 
   const operationTitles: { [key: string]: string } = {
     'background_removal': 'Background Removal',
-    'upscale': 'Image Upscaling',
+    'upscaling': 'Image Upscaling',
     'enhancement': 'Quality Enhancement',
     'generation': 'AI Generation'
   }
