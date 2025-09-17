@@ -1,5 +1,11 @@
+# Track all files larger than 50MB with Git LFS
 *.pth filter=lfs diff=lfs merge=lfs -text
 *.dll filter=lfs diff=lfs merge=lfs -text
 *.lib filter=lfs diff=lfs merge=lfs -text
 *.pyd filter=lfs diff=lfs merge=lfs -text
 *.node filter=lfs diff=lfs merge=lfs -text
+# Track specific large files
+backend/models/*.pth filter=lfs diff=lfs merge=lfs -text
+backend/weights/*.pth filter=lfs diff=lfs merge=lfs -text
+backend/venv/Lib/site-packages/weights/*.pth filter=lfs diff=lfs merge=lfs -text
+frontend/node_modules/@next/swc-win32-x64-msvc/*.node filter=lfs diff=lfs merge=lfs -text
