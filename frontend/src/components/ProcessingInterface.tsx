@@ -53,7 +53,7 @@ export default function ProcessingInterface({
   const operationTitles: { [key: string]: string } = {
     'background_removal': 'Background Removal',
     'upscaling': 'Image Upscaling',
-    'enhancement': 'Quality Enhancement',
+    'photo_restoration': 'Photo Restoration',
     'generation': 'AI Generation'
   }
 
@@ -65,8 +65,18 @@ export default function ProcessingInterface({
     try {
       const formData = new FormData()
       formData.append('file', uploadedFile)
-      formData.append('operation', operation)
-      formData.append('model', model)
+      
+      let endpoint = 'http://localhost:8000/api/v1/process'
+      
+      // Use dedicated photo restoration endpoint for photo restoration
+      if (operation === 'photo_restoration') {
+        endpoint = 'http://localhost:8000/api/v1/restore-photo'
+        formData.append('method', model)
+        formData.append('scale', '2') // Default scale
+      } else {
+        formData.append('operation', operation)
+        formData.append('model', model)
+      }
 
       console.log('📤 Sending processing request...')
       
@@ -89,7 +99,7 @@ export default function ProcessingInterface({
 
       console.log('📡 Making fetch request to API...')
       console.log('📋 Request details:', {
-        url: 'http://localhost:8000/api/v1/process',
+        url: endpoint,
         method: 'POST',
         operation,
         model,
@@ -97,7 +107,7 @@ export default function ProcessingInterface({
         fileSize: uploadedFile.size
       })
       
-      const response = await fetch('http://localhost:8000/api/v1/process', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
         signal: controller.signal,
@@ -114,21 +124,35 @@ export default function ProcessingInterface({
 
       const result = await response.json()
       console.log('📋 Processing result:', result); // Debug log
+      console.log('📋 Result structure:', JSON.stringify(result, null, 2)); // Detailed debug
       
       // Check if the result indicates an error
       if (result.status === 'error') {
         throw new Error(result.error || 'Processing failed on server');
       }
       
+      // Validate that we have the expected result structure
+      if (!result.result) {
+        console.error('❌ Missing result object in response:', result);
+        throw new Error('Invalid response structure: missing result object');
+      }
+      
+      if (!result.result.output_filename) {
+        console.error('❌ Missing output_filename in result:', result.result);
+        throw new Error('Processing completed but no output file was generated');
+      }
+      
       console.log('✅ Setting processed result...')
       setProcessedResult(result)
       
-      // If there's a processed image path, try to create preview (optional)
-      if (result.result?.output_path) {
+      // If there's a processed image path, try to create preview
+      if (result.result.output_path && result.result.output_filename) {
         try {
           console.log('🖼️ Attempting to load image preview...')
+          console.log('🔗 Download URL:', `http://localhost:8000/api/v1/download/${result.result.output_filename}`);
           // Fetch the processed image for preview
           const imageResponse = await fetch(`http://localhost:8000/api/v1/download/${result.result.output_filename}`)
+          console.log('📨 Image response status:', imageResponse.status);
           if (imageResponse.ok) {
             const blob = await imageResponse.blob()
             const previewUrl = URL.createObjectURL(blob)
@@ -156,7 +180,18 @@ export default function ProcessingInterface({
       
       console.log('🎉 Processing completed successfully!')
       setProcessingProgress(100)
-      toast.success('Image processed successfully!')
+      
+      // Show specific success message for photo restoration
+      if (operation === 'photo_restoration') {
+        const facesRestored = result.faces_restored || 0
+        if (facesRestored > 0) {
+          toast.success(`Photo restoration complete! Restored ${facesRestored} face${facesRestored > 1 ? 's' : ''}`)
+        } else {
+          toast.success('Photo restoration completed successfully!')
+        }
+      } else {
+        toast.success('Image processed successfully!')
+      }
       
     } catch (error) {
       console.error('❌ Processing error:', error)
@@ -322,11 +357,21 @@ export default function ProcessingInterface({
                       ></div>
                     </div>
                     <div className="flex justify-between text-sm text-gray-600 mb-2">
-                      <span>Processing with Real-ESRGAN AI...</span>
+                      <span>
+                        {operation === 'photo_restoration' 
+                          ? 'Restoring photo with GFPGAN AI...' 
+                          : operation === 'upscaling'
+                          ? 'Processing with Real-ESRGAN AI...'
+                          : 'Processing with AI...'
+                        }
+                      </span>
                       <span>{Math.round(processingProgress)}%</span>
                     </div>
                     <p className="text-sm text-gray-500">
-                      High-quality upscaling in progress. This may take up to 5 minutes for complex images.
+                      {operation === 'photo_restoration'
+                        ? 'AI face restoration in progress. Analyzing and enhancing faces in your photo...'
+                        : 'High-quality upscaling in progress. This may take up to 5 minutes for complex images.'
+                      }
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
                       Please don't close this tab while processing.

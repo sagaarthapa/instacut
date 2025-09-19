@@ -13,6 +13,7 @@ from pathlib import Path
 # Import independent modules
 from modules.background_remover import BackgroundRemover
 from modules.upscaler import UpscalerEngine
+from modules.photo_restoration import PhotoRestorationEngine
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,10 @@ class ModularAIOrchestrator:
             logger.info("Initializing Upscaler Engine module...")
             self.modules['upscaler'] = UpscalerEngine()
             
+            # Initialize Photo Restoration Engine
+            logger.info("Initializing Photo Restoration Engine module...")
+            self.modules['photo_restoration'] = PhotoRestorationEngine()
+            
             logger.info(f"✅ Modular AI Orchestrator initialized with {len(self.modules)} modules")
             
         except Exception as e:
@@ -62,6 +67,14 @@ class ModularAIOrchestrator:
             services['upscaling'] = {
                 model: {'available': True, 'type': 'upscaling', 'scale': info['scale']}
                 for model, info in upscale_models.items()
+            }
+        
+        # Photo restoration services
+        if 'photo_restoration' in self.modules:
+            restoration_methods = self.modules['photo_restoration'].get_available_restoration_methods()
+            services['photo_restoration'] = {
+                method: {'available': True, 'type': 'photo_restoration'}
+                for method in restoration_methods.keys()
             }
         
         return services
@@ -159,6 +172,50 @@ class ModularAIOrchestrator:
                         raise Exception("Image upscaling failed")
                 else:
                     raise Exception("Upscaler Engine module not available")
+            
+            elif operation == "photo_restoration":
+                output_filename = f"restored_{model or 'auto'}_{input_path.stem}.jpg"
+                output_path = f"processed/{output_filename}"
+                
+                # Use Photo Restoration Engine module
+                if 'photo_restoration' in self.modules:
+                    # Parse options for scale
+                    try:
+                        parsed_options = json.loads(options)
+                        scale = parsed_options.get('scale', 2)
+                    except:
+                        scale = 2
+                    
+                    # Call photo restoration (returns tuple: output_path, metadata)
+                    output_path_result, metadata = self.modules['photo_restoration'].restore_photo(
+                        image_path=image_path,
+                        method=model or 'gfpgan_face_restore',
+                        scale=scale,
+                        output_path=output_path
+                    )
+                    
+                    if output_path_result:
+                        processing_time = time.time() - start_time
+                        return {
+                            "status": "success",
+                            "output_path": output_path_result,
+                            "output_filename": output_filename,
+                            "model_used": model or 'gfpgan_face_restore',
+                            "operation": operation,
+                            "processing_time": round(processing_time, 2),
+                            "module": "photo_restoration",
+                            "metadata": {
+                                "input_file": input_path.name,
+                                "method": model or 'gfpgan_face_restore',
+                                "faces_restored": metadata.get('faces_restored', 0),
+                                "enhancement_applied": metadata.get('enhancement_applied', False)
+                            }
+                        }
+                    else:
+                        error_msg = metadata.get('error', 'Photo restoration failed') if metadata else 'Photo restoration failed'
+                        raise Exception(error_msg)
+                else:
+                    raise Exception("Photo Restoration Engine module not available")
             
             else:
                 raise Exception(f"Unknown operation: {operation}")

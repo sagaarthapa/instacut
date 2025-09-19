@@ -40,12 +40,12 @@ export default function ProcessingOptions({
       model: 'realesrgan_4x'
     },
     {
-      id: 'enhancement',
-      title: 'Enhance Quality',
-      description: 'Improve image quality and restore details',
+      id: 'photo_restoration',
+      title: 'Complete Photo Restoration',
+      description: 'Restore entire photos: enhance faces, backgrounds, colors, and details with AI',
       icon: <SparklesIcon className="w-8 h-8" />,
       gradient: 'from-purple-500 to-pink-500',
-      model: 'gfpgan'
+      model: 'complete_photo_restore'
     },
     {
       id: 'generation',

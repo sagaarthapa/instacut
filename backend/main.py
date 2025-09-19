@@ -7,6 +7,7 @@ import asyncio
 from pathlib import Path
 import os
 import uuid
+import json
 from typing import List, Optional, Dict, Any
 import logging
 
@@ -141,10 +142,56 @@ async def get_available_models():
         "categories": {
             "background_removal": ["rembg", "remove_bg_api"],
             "upscaling": ["realesrgan_2x", "realesrgan_4x", "realesrgan_8x", "realesrgan_anime", "realesrgan_face"],
+            "photo_restoration": ["gfpgan_face_restore", "gfpgan_photo_enhance", "basic_sharpen", "contrast_enhance"],
             "generation": ["stable_diffusion", "dalle_3"],
             "enhancement": ["gfpgan", "codeformer"]
         }
     }
+
+@app.get("/api/v1/restoration-methods")
+async def get_restoration_methods():
+    """Get available photo restoration methods"""
+    try:
+        if 'photo_restoration' in ai_orchestrator.modules:
+            methods = ai_orchestrator.modules['photo_restoration'].get_available_restoration_methods()
+            status = ai_orchestrator.modules['photo_restoration'].get_status()
+            
+            return JSONResponse(content={
+                "status": "success",
+                "methods": methods,
+                "engine_status": status,
+                "gfpgan_available": status.get('gfpgan_available', False)
+            })
+        else:
+            return JSONResponse(content={
+                "status": "error",
+                "error": "Photo restoration module not available",
+                "methods": []
+            })
+    except Exception as e:
+        logger.error(f"Error getting restoration methods: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get restoration methods: {str(e)}")
+
+@app.post("/api/v1/download-gfpgan-model")
+async def download_gfpgan_model(model_key: str = Form("gfpgan_v1.3")):
+    """Download GFPGAN model for photo restoration"""
+    try:
+        if 'photo_restoration' in ai_orchestrator.modules:
+            success = ai_orchestrator.modules['photo_restoration'].download_model(model_key)
+            
+            if success:
+                return JSONResponse(content={
+                    "status": "success",
+                    "message": f"Model {model_key} downloaded successfully",
+                    "model_key": model_key
+                })
+            else:
+                raise HTTPException(status_code=500, detail=f"Failed to download model {model_key}")
+        else:
+            raise HTTPException(status_code=500, detail="Photo restoration module not available")
+    except Exception as e:
+        logger.error(f"Model download error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Model download failed: {str(e)}")
 
 @app.post("/api/v1/process")
 async def process_image(
@@ -178,7 +225,15 @@ async def process_image(
         return JSONResponse(content={
             "status": "success",
             "message": "Image processed successfully",
-            "result": result,
+            "result": {
+                "output_path": result.get("output_path"),
+                "output_filename": result.get("output_filename"),
+                "processing_time": result.get("processing_time", 0),
+                "model_used": result.get("model_used", model or "auto"),
+                "operation": result.get("operation", operation),
+                "module": result.get("module", ""),
+                "metadata": result.get("metadata", {})
+            },
             "processing_time": result.get("processing_time", 0),
             "cost": result.get("cost", 0),
             "model_used": result.get("model_used", model or "auto")
@@ -233,6 +288,73 @@ async def batch_process(
     except Exception as e:
         logger.error(f"Batch processing error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Batch processing failed: {str(e)}")
+
+@app.post("/api/v1/restore-photo")
+async def restore_photo(
+    file: UploadFile = File(...),
+    method: Optional[str] = Form("gfpgan_face_restore"),
+    scale: Optional[int] = Form(2),
+    options: Optional[str] = Form("{}")
+):
+    """
+    Restore old, blurry, or damaged photos using AI-powered face restoration
+    
+    Available methods:
+    - gfpgan_face_restore: AI face restoration (recommended for portraits)
+    - gfpgan_photo_enhance: Overall photo enhancement
+    - basic_sharpen: Simple sharpening filter
+    - contrast_enhance: Enhance contrast and brightness
+    """
+    try:
+        logger.info(f"Photo restoration: {file.filename}, method: {method}")
+        
+        # Validate file
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Save uploaded file
+        upload_path = f"uploads/{file.filename}"
+        with open(upload_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        # Parse options
+        try:
+            parsed_options = json.loads(options or "{}")
+        except:
+            parsed_options = {}
+        
+        parsed_options['scale'] = scale
+        
+        # Process with photo restoration
+        result = await ai_orchestrator.process_image(
+            image_path=upload_path,
+            operation="photo_restoration",
+            model=method,
+            options=json.dumps(parsed_options)
+        )
+        
+        return JSONResponse(content={
+            "status": "success", 
+            "message": "Photo restoration completed successfully",
+            "result": {
+                "output_path": result.get("output_path"),
+                "output_filename": result.get("output_filename"),
+                "processing_time": result.get("processing_time", 0),
+                "model_used": result.get("model_used", method),
+                "operation": result.get("operation", "photo_restoration"),
+                "module": result.get("module", "photo_restoration"),
+                "metadata": result.get("metadata", {})
+            },
+            "processing_time": result.get("processing_time", 0),
+            "method_used": method,
+            "faces_restored": result.get("metadata", {}).get("faces_restored", 0),
+            "ai_enhanced": result.get("metadata", {}).get("method", "").startswith("gfpgan")
+        })
+        
+    except Exception as e:
+        logger.error(f"Photo restoration error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Photo restoration failed: {str(e)}")
 
 @app.get("/api/v1/download/{filename}")
 async def download_processed_image(filename: str):
