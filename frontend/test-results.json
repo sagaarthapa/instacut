@@ -11,7 +11,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 5
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "reporter": [
@@ -43,7 +43,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 5
+          "actualWorkers": 1
         },
         "id": "chromium",
         "name": "chromium",
@@ -59,7 +59,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 5
+          "actualWorkers": 1
         },
         "id": "firefox",
         "name": "firefox",
@@ -75,7 +75,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 5
+          "actualWorkers": 1
         },
         "id": "webkit",
         "name": "webkit",
@@ -91,7 +91,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 5
+          "actualWorkers": 1
         },
         "id": "Mobile Chrome",
         "name": "Mobile Chrome",
@@ -107,7 +107,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 5
+          "actualWorkers": 1
         },
         "id": "Mobile Safari",
         "name": "Mobile Safari",
@@ -133,353 +133,170 @@
   },
   "suites": [
     {
-      "title": "e2e\\test-ui-confusion.spec.ts",
-      "file": "e2e/test-ui-confusion.spec.ts",
+      "title": "e2e\\comprehensive-test.spec.ts",
+      "file": "e2e/comprehensive-test.spec.ts",
       "column": 0,
       "line": 0,
-      "specs": [
+      "specs": [],
+      "suites": [
         {
-          "title": "Check UI text before processing starts",
-          "ok": false,
-          "tags": [],
-          "tests": [
+          "title": "Frontend Feature Verification",
+          "file": "e2e/comprehensive-test.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
             {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "chromium",
-              "projectName": "chromium",
-              "results": [
+              "title": "Complete frontend test with screenshots and evidence",
+              "ok": true,
+              "tags": [],
+              "tests": [
                 {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "timedOut",
-                  "duration": 37669,
-                  "error": {
-                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                  },
-                  "errors": [
-                    {
-                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                    }
-                  ],
-                  "stdout": [
-                    {
-                      "text": "=== Testing UI text before processing ===\n"
-                    },
-                    {
-                      "text": "=== Checking processing interface text ===\n"
-                    },
-                    {
-                      "text": "Card section text:\n"
-                    },
-                    {
-                      "text": "Ready to process your imageUsing rembg model for optimal resultsStart Processing\n"
-                    },
-                    {
-                      "text": "Contains \"Processing\": true\n"
-                    },
-                    {
-                      "text": "Contains \"Processing...\": false\n"
-                    },
-                    {
-                      "text": "Contains \"Ready\": true\n"
-                    },
-                    {
-                      "text": "Start Processing button visible: true\n"
-                    },
-                    {
-                      "text": "Headers found: [\n  \u001b[32m'Background Removal'\u001b[39m,\n  \u001b[32m'Ready to process your image'\u001b[39m,\n  \u001b[32m\"Why We're Better\"\u001b[39m,\n  \u001b[32m'AI-Powered Everything'\u001b[39m,\n  \u001b[32m'Lightning Fast Processing'\u001b[39m,\n  \u001b[32m'Multiple AI Models'\u001b[39m,\n  \u001b[32m'Hybrid Cloud Architecture'\u001b[39m,\n  \u001b[32m'Enterprise Security'\u001b[39m,\n  \u001b[32m'85% Cost Savings'\u001b[39m,\n  \u001b[32m'Batch Processing'\u001b[39m,\n  \u001b[32m'Advanced Editing Tools'\u001b[39m,\n  \u001b[32m'Real-time Analytics'\u001b[39m,\n  \u001b[32m'Admin Configuration'\u001b[39m,\n  \u001b[32m'Team Collaboration'\u001b[39m,\n  \u001b[32m'Mobile Optimized'\u001b[39m,\n  \u001b[32m'Experience the Difference'\u001b[39m,\n  \u001b[32m'How Our Superior ProcessDelivers Amazing Results'\u001b[39m,\n  \u001b[32m'Smart Upload'\u001b[39m,\n  \u001b[32m'AI Model Selection'\u001b[39m,\n  \u001b[32m'Lightning Processing'\u001b[39m,\n  \u001b[32m'Quality Enhancement'\u001b[39m,\n  \u001b[32m'Perfect Results'\u001b[39m,\n  \u001b[32m'Continuous Improvement'\u001b[39m,\n  \u001b[32m'Why Our Process Beats Pixelcut.ai'\u001b[39m,\n  \u001b[32m'Why Teams Choose Us OverPixelcut.ai'\u001b[39m,\n  \u001b[32m'Fair Pricing,Superior Value'\u001b[39m,\n  \u001b[32m'Free'\u001b[39m,\n  \u001b[32m'Pro'\u001b[39m,\n  \u001b[32m'Team'\u001b[39m,\n  \u001b[32m'Enterprise'\u001b[39m,\n  \u001b[32m\"Why We're Superior to Pixelcut.ai\"\u001b[39m,\n  \u001b[32m'Ready to Save 85% While Getting Better Results?'\u001b[39m,\n  \u001b[32m'Stop Overpaying forInferior Results'\u001b[39m,\n  \u001b[32m'Why Switch Right Now?'\u001b[39m,\n  \u001b[32m'Final Reality Check: Us vs. Expensive Alternatives'\u001b[39m,\n  \u001b[32m\"Don't Let Competitors Get Ahead\"\u001b[39m\n]\n"
-                    },
-                    {
-                      "text": "=== UI test completed ===\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-09-15T09:36:54.729Z",
+                  "timeout": 30000,
                   "annotations": [],
-                  "attachments": [
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
                     {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-chromium\\test-failed-1.png"
-                    },
-                    {
-                      "name": "video",
-                      "contentType": "video/webm",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-chromium\\video.webm"
-                    },
-                    {
-                      "name": "error-context",
-                      "contentType": "text/markdown",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-chromium\\error-context.md"
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 25014,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🚀 COMPREHENSIVE FRONTEND TEST STARTING...\n\n"
+                        },
+                        {
+                          "text": "=== STEP 1: HOMEPAGE ===\n"
+                        },
+                        {
+                          "text": "✅ Homepage loaded and screenshot taken\n"
+                        },
+                        {
+                          "text": "Upload area visible: \u001b[33mtrue\u001b[39m\n"
+                        },
+                        {
+                          "text": "\n=== STEP 2: FILE UPLOAD ===\n"
+                        },
+                        {
+                          "text": "✅ File uploaded successfully\n"
+                        },
+                        {
+                          "text": "✅ After-upload screenshot taken\n"
+                        },
+                        {
+                          "text": "\n=== STEP 3: PROCESSING OPTIONS ANALYSIS ===\n"
+                        },
+                        {
+                          "text": "✅ Processing options page detected\n"
+                        },
+                        {
+                          "text": "\n--- PROCESSING OPTIONS CHECK ---\n"
+                        },
+                        {
+                          "text": "Photo Restoration: ✅ FOUND (SHOULD EXIST) 🎉 CORRECT\n"
+                        },
+                        {
+                          "text": "Enhance Quality: ❌ NOT FOUND (SHOULD NOT EXIST) 🎉 CORRECT\n"
+                        },
+                        {
+                          "text": "Remove Background: ✅ FOUND (SHOULD EXIST) 🎉 CORRECT\n"
+                        },
+                        {
+                          "text": "Upscale Image: ✅ FOUND (SHOULD EXIST) 🎉 CORRECT\n"
+                        },
+                        {
+                          "text": "AI Generate: ❌ NOT FOUND (SHOULD NOT EXIST) 🎉 CORRECT\n"
+                        },
+                        {
+                          "text": "\n=== STEP 4: DETAILED CONTENT ANALYSIS ===\n"
+                        },
+                        {
+                          "text": "Processing cards found: 3\n"
+                        },
+                        {
+                          "text": "Photo Restoration description: ✅ FOUND\n"
+                        },
+                        {
+                          "text": "Background Removal description: ✅ FOUND\n"
+                        },
+                        {
+                          "text": "Upscale description: ✅ FOUND\n"
+                        },
+                        {
+                          "text": "\n=== STEP 5: INTERACTION TEST ===\n"
+                        },
+                        {
+                          "text": "✅ Photo Restoration card is clickable\n"
+                        },
+                        {
+                          "text": "✅ Photo Restoration click test completed\n"
+                        },
+                        {
+                          "text": "Processing interface appeared: ❌ NO\n"
+                        },
+                        {
+                          "text": "\n=== FINAL TEST SUMMARY ===\n"
+                        },
+                        {
+                          "text": "✅ Homepage loads correctly\n"
+                        },
+                        {
+                          "text": "✅ File upload works\n"
+                        },
+                        {
+                          "text": "✅ Processing options page appears\n"
+                        },
+                        {
+                          "text": "📸 Photo Restoration: WORKING\n"
+                        },
+                        {
+                          "text": "❌ Enhance Quality: CORRECTLY REMOVED\n"
+                        },
+                        {
+                          "text": "✂️ Background Removal: WORKING\n"
+                        },
+                        {
+                          "text": "🔍 Upscale Image: WORKING\n"
+                        },
+                        {
+                          "text": "\n🎉 FRONTEND PHOTO RESTORATION FEATURE IS FULLY FUNCTIONAL!\n"
+                        },
+                        {
+                          "text": "\n=== DETAILED REPORT ===\n"
+                        },
+                        {
+                          "text": "{\n  \"test_date\": \"2025-09-19T05:55:36.694Z\",\n  \"homepage_loads\": true,\n  \"file_upload_works\": true,\n  \"processing_options_appear\": true,\n  \"photo_restoration_visible\": true,\n  \"enhance_quality_removed\": true,\n  \"background_removal_visible\": false,\n  \"upscale_image_visible\": false,\n  \"total_processing_cards\": 3,\n  \"conclusion\": \"Photo Restoration feature successfully implemented and working\"\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-09-19T05:55:12.188Z",
+                      "annotations": [],
+                      "attachments": []
                     }
-                  ]
+                  ],
+                  "status": "expected"
                 }
               ],
-              "status": "unexpected"
+              "id": "9f78fa615e8792ac53b2-cf1568d5f80c0ffbf7dc",
+              "file": "e2e/comprehensive-test.spec.ts",
+              "line": 4,
+              "column": 7
             }
-          ],
-          "id": "de9f08be682bde1bfeeb-09ee1bb675b132db1ec1",
-          "file": "e2e/test-ui-confusion.spec.ts",
-          "line": 3,
-          "column": 5
-        },
-        {
-          "title": "Check UI text before processing starts",
-          "ok": false,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "firefox",
-              "projectName": "firefox",
-              "results": [
-                {
-                  "workerIndex": 1,
-                  "parallelIndex": 1,
-                  "status": "timedOut",
-                  "duration": 30105,
-                  "error": {
-                    "message": "\u001b[31mTest timeout of 30000ms exceeded while setting up \"page\".\u001b[39m",
-                    "stack": "\u001b[31mTest timeout of 30000ms exceeded while setting up \"page\".\u001b[39m"
-                  },
-                  "errors": [
-                    {
-                      "message": "\u001b[31mTest timeout of 30000ms exceeded while setting up \"page\".\u001b[39m"
-                    },
-                    {
-                      "message": "Error: browserContext.newPage: Test timeout of 30000ms exceeded."
-                    }
-                  ],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-09-15T09:36:54.634Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "unexpected"
-            }
-          ],
-          "id": "de9f08be682bde1bfeeb-291f505ad711c7bf2639",
-          "file": "e2e/test-ui-confusion.spec.ts",
-          "line": 3,
-          "column": 5
-        },
-        {
-          "title": "Check UI text before processing starts",
-          "ok": false,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "webkit",
-              "projectName": "webkit",
-              "results": [
-                {
-                  "workerIndex": 2,
-                  "parallelIndex": 2,
-                  "status": "timedOut",
-                  "duration": 34779,
-                  "error": {
-                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                  },
-                  "errors": [
-                    {
-                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                    },
-                    {
-                      "location": {
-                        "file": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\tests\\e2e\\test-ui-confusion.spec.ts",
-                        "column": 14,
-                        "line": 8
-                      },
-                      "message": "Error: page.goto: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n\u001b[0m \u001b[90m  6 |\u001b[39m   console\u001b[33m.\u001b[39mlog(\u001b[32m'=== Testing UI text before processing ==='\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  7 |\u001b[39m   \n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  8 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost:3000'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  9 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForLoadState(\u001b[32m'networkidle'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 10 |\u001b[39m\n \u001b[90m 11 |\u001b[39m   \u001b[90m// Create test image\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\tests\\e2e\\test-ui-confusion.spec.ts:8:14\u001b[22m"
-                    }
-                  ],
-                  "stdout": [
-                    {
-                      "text": "=== Testing UI text before processing ===\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-09-15T09:36:54.838Z",
-                  "annotations": [],
-                  "attachments": [
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-webkit\\test-failed-1.png"
-                    },
-                    {
-                      "name": "video",
-                      "contentType": "video/webm",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-webkit\\video.webm"
-                    }
-                  ]
-                }
-              ],
-              "status": "unexpected"
-            }
-          ],
-          "id": "de9f08be682bde1bfeeb-c555fad69b5f6a44e8f4",
-          "file": "e2e/test-ui-confusion.spec.ts",
-          "line": 3,
-          "column": 5
-        },
-        {
-          "title": "Check UI text before processing starts",
-          "ok": false,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "Mobile Chrome",
-              "projectName": "Mobile Chrome",
-              "results": [
-                {
-                  "workerIndex": 3,
-                  "parallelIndex": 3,
-                  "status": "timedOut",
-                  "duration": 40924,
-                  "error": {
-                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                  },
-                  "errors": [
-                    {
-                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                    },
-                    {
-                      "location": {
-                        "file": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\tests\\e2e\\test-ui-confusion.spec.ts",
-                        "column": 40,
-                        "line": 32
-                      },
-                      "message": "Error: locator.textContent: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.glass, [class*=\"card\"], [class*=\"p-6\"]').first()\u001b[22m\n\n\n\u001b[0m \u001b[90m 30 |\u001b[39m   \u001b[36mconst\u001b[39m cardSection \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.glass, [class*=\"card\"], [class*=\"p-6\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[36mawait\u001b[39m cardSection\u001b[33m.\u001b[39misVisible()) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 32 |\u001b[39m     \u001b[36mconst\u001b[39m cardText \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m cardSection\u001b[33m.\u001b[39mtextContent()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 33 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m'Card section text:'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 34 |\u001b[39m     console\u001b[33m.\u001b[39mlog(cardText)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[0m\n\u001b[2m    at C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\tests\\e2e\\test-ui-confusion.spec.ts:32:40\u001b[22m"
-                    }
-                  ],
-                  "stdout": [
-                    {
-                      "text": "=== Testing UI text before processing ===\n"
-                    },
-                    {
-                      "text": "=== Checking processing interface text ===\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-09-15T09:36:54.737Z",
-                  "annotations": [],
-                  "attachments": [
-                    {
-                      "name": "video",
-                      "contentType": "video/webm",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-Mobile-Chrome\\video.webm"
-                    },
-                    {
-                      "name": "error-context",
-                      "contentType": "text/markdown",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-Mobile-Chrome\\error-context.md"
-                    }
-                  ]
-                }
-              ],
-              "status": "unexpected"
-            }
-          ],
-          "id": "de9f08be682bde1bfeeb-080cb5c6bc198e6d4684",
-          "file": "e2e/test-ui-confusion.spec.ts",
-          "line": 3,
-          "column": 5
-        },
-        {
-          "title": "Check UI text before processing starts",
-          "ok": false,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 30000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "Mobile Safari",
-              "projectName": "Mobile Safari",
-              "results": [
-                {
-                  "workerIndex": 4,
-                  "parallelIndex": 4,
-                  "status": "timedOut",
-                  "duration": 35027,
-                  "error": {
-                    "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                    "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                  },
-                  "errors": [
-                    {
-                      "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                    },
-                    {
-                      "location": {
-                        "file": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\tests\\e2e\\test-ui-confusion.spec.ts",
-                        "column": 14,
-                        "line": 8
-                      },
-                      "message": "Error: page.goto: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"load\"\u001b[22m\n\n\n\u001b[0m \u001b[90m  6 |\u001b[39m   console\u001b[33m.\u001b[39mlog(\u001b[32m'=== Testing UI text before processing ==='\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  7 |\u001b[39m   \n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  8 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'http://localhost:3000'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  9 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForLoadState(\u001b[32m'networkidle'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 10 |\u001b[39m\n \u001b[90m 11 |\u001b[39m   \u001b[90m// Create test image\u001b[39m\u001b[0m\n\u001b[2m    at C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\tests\\e2e\\test-ui-confusion.spec.ts:8:14\u001b[22m"
-                    }
-                  ],
-                  "stdout": [
-                    {
-                      "text": "=== Testing UI text before processing ===\n"
-                    }
-                  ],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2025-09-15T09:36:54.666Z",
-                  "annotations": [],
-                  "attachments": [
-                    {
-                      "name": "screenshot",
-                      "contentType": "image/png",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-Mobile-Safari\\test-failed-1.png"
-                    },
-                    {
-                      "name": "video",
-                      "contentType": "video/webm",
-                      "path": "C:\\Users\\SAM\\Desktop\\ai image generator\\ai-image-studio\\frontend\\test-results\\e2e-test-ui-confusion-Check-UI-text-before-processing-starts-Mobile-Safari\\video.webm"
-                    }
-                  ]
-                }
-              ],
-              "status": "unexpected"
-            }
-          ],
-          "id": "de9f08be682bde1bfeeb-38a02f3e7835d70eaa67",
-          "file": "e2e/test-ui-confusion.spec.ts",
-          "line": 3,
-          "column": 5
+          ]
         }
       ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-09-15T09:36:37.617Z",
-    "duration": 77247.964,
-    "expected": 0,
+    "startTime": "2025-09-19T05:54:41.132Z",
+    "duration": 57664.329999999994,
+    "expected": 1,
     "skipped": 0,
-    "unexpected": 5,
+    "unexpected": 0,
     "flaky": 0
   }
 }
